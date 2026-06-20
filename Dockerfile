@@ -99,7 +99,6 @@ ENV PATH="${GOPATH}/bin:/usr/local/go/bin:${PATH}"
 
 
 # Install Browser (Lightpanda)
-# Install Browser (Lightpanda)
 RUN curl -L -o /usr/local/bin/lightpanda \
     https://github.com/lightpanda-io/browser/releases/download/nightly/lightpanda-x86_64-linux \
     && chmod +x /usr/local/bin/lightpanda
@@ -117,7 +116,7 @@ RUN mkdir -p $GOPATH/bin $GOPATH/src
 RUN uv python install --default
 ENV PATH="${HOME}/.local/bin:${PATH}"
 
-# Pyhton tools
+# Python tools
 RUN uv tool install ruff@latest && \
     uv tool install ty@latest
 
@@ -208,12 +207,12 @@ ENTRYPOINT ["/bin/bash", "-c", "nanobot gateway"]
 #
 # CodeNomad & OpenCode
 #
-# Folders thats needed:
+# Folders that are needed:
 #   /home/ai/ai-workdir - for code and projects, this is the main workspace    
 #   /home/ai/.local/share/opencode - for OpenCode auth persistence, this is needed to keep Copilot login working across container restarts.
 #   /home/ai/.config/codenomad - for CodeNomad's own data, such as installed agents and their data. Not strictly needed to persist this, but good to have it outside of the container for easier access and backup.    
 #
-# OpenCode auth needs to be completed before CodeNomad is used:
+# OpenCode auth must be completed before CodeNomad is used:
 #  - Exec into the container with docker exec -it codenomad-agent bash
 #  - Then run `opencode auth login` once and persist ~/.local/share/opencode to keep Copilot login.
 
@@ -228,12 +227,12 @@ ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && codenomad --http true --h
 #
 # Hapi & OpenCode
 #
-# Folders thats needed:
+# Folders that are needed:
 #   /home/ai/ai-workdir - for code and projects, this is the main workspace    
 #   /home/ai/.local/share/opencode - for OpenCode auth persistence, this is needed to keep Copilot login working across container restarts.
 #   /home/ai/.hapi - for Hapi's own data, such as installed agents and their data. Not strictly needed to persist this, but good to have it outside of the container for easier access and backup.    
 #
-# OpenCode auth needs to be completed before hapi is used:
+# OpenCode auth must be completed before hapi is used:
 #  - Exec into the container with docker exec -it hapi-agent bash
 #  - Then run `opencode auth login` once and persist ~/.local/share/opencode to keep Copilot login.
 
