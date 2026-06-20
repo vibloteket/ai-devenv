@@ -86,7 +86,8 @@ COPY --from=gitlab/glab:latest /usr/bin/glab /usr/local/bin/glab
 
 # Install Codeberg / forgejo
 RUN curl -OL https://codeberg.org/forgejo-contrib/forgejo-cli/releases/download/v0.5.0/forgejo-cli-x86_64-linux.tar.gz \
-    && tar -C /usr/local -xzf forgejo-cli-x86_64-linux.tar.gz \
+    && tar -C /usr/local/bin -xzf forgejo-cli-x86_64-linux.tar.gz \
+    && chmod +x /usr/local/bin/fj \
     && rm forgejo-cli-x86_64-linux.tar.gz 
 
 # Install GO
