@@ -84,6 +84,11 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
 # Install GitLab CLI 
 COPY --from=gitlab/glab:latest /usr/bin/glab /usr/local/bin/glab
 
+# Install Codeberg / forgejo
+RUN curl -OL https://codeberg.org/forgejo-contrib/forgejo-cli/releases/download/v0.5.0/forgejo-cli-x86_64-linux.tar.gz \
+    && tar -C /usr/local -xzf forgejo-cli-x86_64-linux.tar.gz \
+    && rm forgejo-cli-x86_64-linux.tar.gz 
+
 # Install GO
 RUN curl -OL https://golang.org/dl/go1.26.0.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.26.0.linux-amd64.tar.gz && \
@@ -130,7 +135,8 @@ ENV SHELL=/bin/bash
 
 # Set git user & email
 RUN git config --global user.name "$GIT_USER" && \
-    git config --global user.email "$GIT_EMAIL"
+    git config --global user.email "$GIT_EMAIL" && \
+    git config --global init.defaultBranch main
 
 # Install Bun
 ENV BUN_INSTALL="${HOME}/.bun"
@@ -148,6 +154,7 @@ RUN echo "Installed Versions" \
     && java --version \
     && gh --version \
     && glab --version \
+    && fj version \
     && bun --version \
     && node --version \
     && npm --version
@@ -191,12 +198,12 @@ ENTRYPOINT ["/bin/bash", "-c", "picoclaw-launcher -public -port 8131"]
 #
 FROM base AS nanobot-agent
 
-RUN uv tool install nanobot-webui
+RUN uv tool install nanobot-ai
 
 EXPOSE 8136
 
 #ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/bin/bash", "-c", "nanobot webui start --port 8136"]
+ENTRYPOINT ["/bin/bash", "-c", "nanobot gateway"]
 
 #
 # CodeNomad & OpenCode
@@ -285,7 +292,7 @@ RUN bun install -g github:rcarmo/piclaw
 
 EXPOSE 8161
 
-ENTRYPOINT ["/bin/bash", "-lc", "export PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
+ENTRYPOINT ["/bin/bash", "-lc", "export PICLAW_WEB_UI_MODE=visual PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
 
 #
 # Bernstein
