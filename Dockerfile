@@ -246,22 +246,6 @@ EXPOSE 8146
 ENTRYPOINT ["/bin/bash", "-lc", "export HAPI_LISTEN_HOST=0.0.0.0 HAPI_LISTEN_PORT=8146 HAPI_API_URL=http://127.0.0.1:8146; cd \"$HOME/ai-workdir\"; hapi hub & hub_pid=$!; until curl -fsS http://127.0.0.1:8146/health > /dev/null; do if ! kill -0 \"$hub_pid\" 2>/dev/null; then wait \"$hub_pid\"; exit $?; fi; sleep 1; done; hapi runner start --workspace-root /home/ai/ai-workdir ; wait \"$hub_pid\""]
 
 #
-# Rho & Pi
-#
-# Folders thats needed:
-#   /home/ai/ai-workdir - for code and projects, this is the main workspace    
-#   /home/ai/.rho - For Rhos data
-#
-
-FROM base AS rho-agent
-
-RUN bun install -g @mariozechner/pi-coding-agent && bun install -g @rhobot-dev/rho
-
-EXPOSE 8146
-
-ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && rho web --port 8146"]
-
-#
 # Paseo & Pi & OpenCode
 #
 FROM base AS paseo-agent
@@ -270,17 +254,6 @@ RUN bun install -g @mariozechner/pi-coding-agent && bun install -g opencode-ai &
 EXPOSE 8151
 
 ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo start --listen 0.0.0.0:8151 --foreground"]
-#ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo"]
-
-#
-# Yepanywhere & OpenCode
-#
-FROM base AS yepanywhere-agent
-RUN bun install -g opencode-ai && bun install -g yepanywhere
-
-EXPOSE 8156
-
-ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && yepanywhere"]
 #ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo"]
 
 #
@@ -294,13 +267,4 @@ EXPOSE 8161
 
 ENTRYPOINT ["/bin/bash", "-lc", "export PICLAW_WEB_UI_MODE=visual PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
 
-#
-# Bernstein
-#
-FROM base AS bernstein-agent
-RUN bun install -g opencode-ai && uv tool install bernstein 
 
-EXPOSE 8165
-
-ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && yepanywhere"]
-#ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo"]
