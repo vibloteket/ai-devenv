@@ -138,6 +138,9 @@ RUN git config --global user.name "$GIT_USER" && \
     git config --global user.email "$GIT_EMAIL" && \
     git config --global init.defaultBranch main
 
+# Populate host-scoped git credential stores at runtime from container env vars.
+COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
+
 # Install Bun
 ENV BUN_INSTALL="${HOME}/.bun"
 # .local/bin will be put first anyway from .profile, so can just as well do it here.
@@ -171,7 +174,7 @@ RUN bun install -g opencode-ai && bun install -g @openchamber/web
 
 EXPOSE 8126
 
-ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && openchamber --port 8126 --host 0.0.0.0 && exec openchamber logs --port 8126"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && openchamber --port 8126 --host 0.0.0.0 && exec openchamber logs --port 8126"]
 
 #
 # PicoClaw
@@ -191,7 +194,7 @@ RUN mkdir $HOME/.picoclaw
 
 EXPOSE 8131
 #ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/bin/bash", "-c", "picoclaw-launcher -public -port 8131"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "picoclaw-launcher -public -port 8131"]
 
 #
 # Nanobot
@@ -203,7 +206,7 @@ RUN uv tool install nanobot-ai
 EXPOSE 8136
 
 #ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/bin/bash", "-c", "nanobot gateway"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "nanobot gateway"]
 
 #
 # CodeNomad & OpenCode
@@ -223,7 +226,7 @@ RUN bun install -g opencode-ai && bun install -g @neuralnomads/codenomad
 
 EXPOSE 8141
 
-ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && codenomad --http true --http-port 8141 --https false --host 0.0.0.0 --dangerously-skip-auth "]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && codenomad --http true --http-port 8141 --https false --host 0.0.0.0 --dangerously-skip-auth "]
 
 #
 # Hapi & OpenCode
@@ -243,7 +246,7 @@ RUN bun install -g opencode-ai && bun install -g @twsxtd/hapi
 
 EXPOSE 8146
 
-ENTRYPOINT ["/bin/bash", "-lc", "export HAPI_LISTEN_HOST=0.0.0.0 HAPI_LISTEN_PORT=8146 HAPI_API_URL=http://127.0.0.1:8146; cd \"$HOME/ai-workdir\"; hapi hub & hub_pid=$!; until curl -fsS http://127.0.0.1:8146/health > /dev/null; do if ! kill -0 \"$hub_pid\" 2>/dev/null; then wait \"$hub_pid\"; exit $?; fi; sleep 1; done; hapi runner start --workspace-root /home/ai/ai-workdir ; wait \"$hub_pid\""]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export HAPI_LISTEN_HOST=0.0.0.0 HAPI_LISTEN_PORT=8146 HAPI_API_URL=http://127.0.0.1:8146; cd \"$HOME/ai-workdir\"; hapi hub & hub_pid=$!; until curl -fsS http://127.0.0.1:8146/health > /dev/null; do if ! kill -0 \"$hub_pid\" 2>/dev/null; then wait \"$hub_pid\"; exit $?; fi; sleep 1; done; hapi runner start --workspace-root /home/ai/ai-workdir ; wait \"$hub_pid\""]
 
 #
 # Paseo & Pi & OpenCode
@@ -253,7 +256,7 @@ RUN bun install -g @mariozechner/pi-coding-agent && bun install -g opencode-ai &
 
 EXPOSE 8151
 
-ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo start --listen 0.0.0.0:8151 --foreground"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && paseo start --listen 0.0.0.0:8151 --foreground"]
 #ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo"]
 
 #
@@ -265,6 +268,6 @@ RUN bun install -g github:rcarmo/piclaw
 
 EXPOSE 8161
 
-ENTRYPOINT ["/bin/bash", "-lc", "export PICLAW_WEB_UI_MODE=visual PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export PICLAW_WEB_UI_MODE=visual PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
 
 
