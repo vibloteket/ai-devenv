@@ -85,10 +85,10 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
 COPY --from=gitlab/glab:latest /usr/bin/glab /usr/local/bin/glab
 
 # Install Codeberg / forgejo
-RUN curl -OL https://codeberg.org/forgejo-contrib/forgejo-cli/releases/download/v0.5.0/forgejo-cli-x86_64-linux.tar.gz \
-    && tar -C /usr/local/bin -xzf forgejo-cli-x86_64-linux.tar.gz \
-    && chmod +x /usr/local/bin/fj \
-    && rm forgejo-cli-x86_64-linux.tar.gz 
+# RUN curl -OL https://codeberg.org/forgejo-contrib/forgejo-cli/releases/download/v0.5.0/forgejo-cli-x86_64-linux.tar.gz \
+#     && tar -C /usr/local/bin -xzf forgejo-cli-x86_64-linux.tar.gz \
+#     && chmod +x /usr/local/bin/fj \
+#     && rm forgejo-cli-x86_64-linux.tar.gz 
 
 # Install GO
 RUN curl -OL https://golang.org/dl/go1.26.0.linux-amd64.tar.gz && \
@@ -157,7 +157,7 @@ RUN echo "Installed Versions" \
     && java --version \
     && gh --version \
     && glab --version \
-    && fj version \
+    # && fj version \
     && bun --version \
     && node --version \
     && npm --version
@@ -168,33 +168,33 @@ RUN mkdir $HOME/ai-workdir
 #
 # OpenChamber & OpenCode
 #
-FROM base AS openchamber-agent
+# FROM base AS openchamber-agent
 
-RUN bun install -g opencode-ai && bun install -g @openchamber/web
+# RUN bun install -g opencode-ai && bun install -g @openchamber/web
 
-EXPOSE 8126
+# EXPOSE 8126
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && openchamber --port 8126 --host 0.0.0.0 && exec openchamber logs --port 8126"]
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && openchamber --port 8126 --host 0.0.0.0 && exec openchamber logs --port 8126"]
 
 #
 # PicoClaw
 #
-FROM base AS picoclaw-agent
+# FROM base AS picoclaw-agent
 
 # Download and extract the binary to user's local bin
-RUN curl -L "https://github.com/sipeed/picoclaw/releases/latest/download/picoclaw_Linux_x86_64.tar.gz" -o /tmp/picoclaw.tar.gz \
-    && tar -xzf /tmp/picoclaw.tar.gz -C /tmp \
-    && mv /tmp/picoclaw /home/ai/.local/bin/picoclaw \
-    && chmod +x /home/ai/.local/bin/picoclaw \
-    && mv /tmp/picoclaw-launcher /home/ai/.local/bin/picoclaw-launcher \
-    && chmod +x /home/ai/.local/bin/picoclaw-launcher \
-    && rm /tmp/picoclaw.tar.gz
+# RUN curl -L "https://github.com/sipeed/picoclaw/releases/latest/download/picoclaw_Linux_x86_64.tar.gz" -o /tmp/picoclaw.tar.gz \
+#     && tar -xzf /tmp/picoclaw.tar.gz -C /tmp \
+#     && mv /tmp/picoclaw /home/ai/.local/bin/picoclaw \
+#     && chmod +x /home/ai/.local/bin/picoclaw \
+#     && mv /tmp/picoclaw-launcher /home/ai/.local/bin/picoclaw-launcher \
+#     && chmod +x /home/ai/.local/bin/picoclaw-launcher \
+#     && rm /tmp/picoclaw.tar.gz
 
-RUN mkdir $HOME/.picoclaw
+# RUN mkdir $HOME/.picoclaw
 
-EXPOSE 8131
-#ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "picoclaw-launcher -public -port 8131"]
+# EXPOSE 8131
+# ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "picoclaw-launcher -public -port 8131"]
 
 #
 # Nanobot
@@ -220,13 +220,13 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "nanobot gateway"
 #  - Exec into the container with docker exec -it codenomad-agent bash
 #  - Then run `opencode auth login` once and persist ~/.local/share/opencode to keep Copilot login.
 
-FROM base AS codenomad-agent
+# FROM base AS codenomad-agent
 
-RUN bun install -g opencode-ai && bun install -g @neuralnomads/codenomad
+# RUN bun install -g opencode-ai && bun install -g @neuralnomads/codenomad
 
-EXPOSE 8141
+# EXPOSE 8141
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && codenomad --http true --http-port 8141 --https false --host 0.0.0.0 --dangerously-skip-auth "]
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && codenomad --http true --http-port 8141 --https false --host 0.0.0.0 --dangerously-skip-auth "]
 
 #
 # Hapi & OpenCode
@@ -251,12 +251,12 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export HAPI_LIS
 #
 # Paseo & Pi & OpenCode
 #
-FROM base AS paseo-agent
-RUN bun install -g @mariozechner/pi-coding-agent && bun install -g opencode-ai && bun install -g @getpaseo/cli
+# FROM base AS paseo-agent
+# RUN bun install -g @mariozechner/pi-coding-agent && bun install -g opencode-ai && bun install -g @getpaseo/cli
 
-EXPOSE 8151
+# EXPOSE 8151
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && paseo start --listen 0.0.0.0:8151 --foreground"]
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "cd $HOME/ai-workdir && paseo start --listen 0.0.0.0:8151 --foreground"]
 #ENTRYPOINT ["/bin/bash", "-c", "cd $HOME/ai-workdir && paseo"]
 
 #
