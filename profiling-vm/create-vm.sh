@@ -28,7 +28,12 @@ if virsh -c "$uri" dominfo "$VM_NAME" >/dev/null 2>&1; then
   echo "VM $VM_NAME already exists; refusing to overwrite it." >&2
   exit 1
 fi
-virsh -c "$uri" net-info "$VM_NETWORK" | grep -q '^Active:.*yes' || { echo "Network $VM_NETWORK is not active" >&2; exit 1; }
+network_info=$(virsh -c "$uri" net-info "$VM_NETWORK")
+if ! grep -q '^Active:.*yes' <<<"$network_info"; then
+  echo "Network $VM_NETWORK is not active" >&2
+  printf '%s\n' "$network_info" >&2
+  exit 1
+fi
 
 IFS=, read -r -a cpus <<<"$VM_CPUSET"
 [[ ${#cpus[@]} -eq $VM_VCPUS ]] || { echo "VM_CPUSET must contain exactly VM_VCPUS CPU IDs" >&2; exit 1; }
@@ -47,7 +52,8 @@ if [[ ! -f "$base" ]] || ! printf '%s  %s\n' "$IMAGE_SHA512" "$base" | sha512sum
   sudo install -m 0644 "$work/base.qcow2" "$base"
 fi
 [[ ! -e "$disk" && ! -e "$seed" ]] || { echo "Disk or seed already exists in $IMAGE_DIR; remove explicitly before retrying" >&2; exit 1; }
-if virsh -c "$uri" net-dumpxml "$VM_NETWORK" | grep -qiE "($VM_MAC|ip=['\"]$VM_IP['\"])"; then
+network_xml=$(virsh -c "$uri" net-dumpxml "$VM_NETWORK")
+if grep -qiE "($VM_MAC|ip=['\"]$VM_IP['\"])" <<<"$network_xml"; then
   echo "A DHCP reservation already uses $VM_MAC or $VM_IP" >&2
   exit 1
 fi
