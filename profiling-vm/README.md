@@ -49,7 +49,9 @@ profiling-vm/create-vm.sh
 ```
 
 `config.env`, private keys, images, and seed disks are ignored by Git. The
-script refuses to replace an existing VM, disk, or DHCP reservation.
+script refuses to replace an existing VM, disk, or DHCP reservation. If an
+older `config.env` still points at an image under `/latest/`, copy the current
+versioned `IMAGE_URL` and matching `IMAGE_SHA512` from `config.example.env`.
 
 The default address is `192.168.122.10`. It is directly reachable from the
 libvirt host. Access from another container/network may require a narrowly
@@ -60,7 +62,7 @@ Cloud-init package installation can take several minutes. Check progress:
 ```sh
 profiling-vm/status.sh
 ssh -i ~/.ssh/munk2d-profiler benchmark@192.168.122.10 \
-  'sudo cloud-init status --wait --long'
+  'cloud-init status --wait --long'
 profiling-vm/verify-guest.sh
 ```
 

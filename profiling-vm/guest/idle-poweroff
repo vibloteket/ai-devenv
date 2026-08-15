@@ -13,9 +13,16 @@ if [ "$uptime_seconds" -ge $((max_hours * 3600)) ]; then
 fi
 
 # Keep the VM up while provisioning, package management, an interactive login,
-# or a known build/profiling workload is present.
-if ! cloud-init status 2>/dev/null | grep -q 'status: done' || \
-   who | grep -q . || \
+# or a known build/profiling workload is present. Capture command output before
+# grep because this script runs with pipefail in its test harness.
+cloud_status=$(cloud-init status 2>/dev/null || true)
+login_status=$(who 2>/dev/null || true)
+case "$cloud_status" in
+  *'status: done'*) cloud_ready=true ;;
+  *) cloud_ready=false ;;
+esac
+if [ "$cloud_ready" != true ] || \
+   [ -n "$login_status" ] || \
    pgrep -x 'apt|apt-get|dpkg|perf|munkbench|cmake|ninja|make|cc|gcc|clang|ld|ld.lld' >/dev/null 2>&1; then
   exit 0
 fi

@@ -4,7 +4,8 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 CONFIG=${1:-"$SCRIPT_DIR/config.env"}
 # shellcheck disable=SC1090
 source "$CONFIG"
-key=${SSH_PUBLIC_KEY_FILE%.pub}
+key=${SSH_PRIVATE_KEY_FILE:-${SSH_PUBLIC_KEY_FILE%.pub}}
+[[ -r "$key" ]] || { echo "Cannot read SSH private key: $key" >&2; exit 1; }
 ssh=(ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i "$key" "$VM_USER@$VM_IP")
 "${ssh[@]}" 'set -eu
   test -e /var/lib/cloud/instance/provisioning-complete
