@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# virsh human-readable fields are localized; parsing must use stable C output.
+export LC_ALL=C
+
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 CONFIG=${1:-"$SCRIPT_DIR/config.env"}
 [[ -r "$CONFIG" ]] || { echo "Missing $CONFIG; copy config.example.env to config.env" >&2; exit 2; }
