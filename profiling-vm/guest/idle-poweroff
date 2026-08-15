@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+idle_minutes="${IDLE_MINUTES:-30}"
+max_hours="${MAX_RUNTIME_HOURS:-6}"
+uptime_seconds=$(cut -d. -f1 /proc/uptime)
+
+# The maximum runtime is an unconditional failsafe, even for a wedged job.
+if [ "$uptime_seconds" -ge $((max_hours * 3600)) ]; then
+  logger -t profiling-vm "maximum runtime reached; powering off"
+  systemctl poweroff
+  exit 0
+fi
+
+# Keep the VM up while provisioning, package management, an interactive login,
+# or a known build/profiling workload is present.
+if ! cloud-init status 2>/dev/null | grep -q 'status: done' || \
+   who | grep -q . || \
+   pgrep -x 'apt|apt-get|dpkg|perf|munkbench|cmake|ninja|make|cc|gcc|clang|ld|ld.lld' >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Remote jobs should call profile-heartbeat periodically. /tmp is intentional:
+# each unprivileged user can update only its own file on the sticky directory.
+if find /tmp -maxdepth 1 -user '__VM_USER__' -name 'profiling-vm-active-*' \
+    -mmin "-$idle_minutes" -print -quit 2>/dev/null | grep -q .; then
+  exit 0
+fi
+
+# Do not power off during the initial provisioning window.
+if [ "$uptime_seconds" -lt $((idle_minutes * 60)) ]; then
+  exit 0
+fi
+
+logger -t profiling-vm "idle for at least ${idle_minutes} minutes; powering off"
+systemctl poweroff

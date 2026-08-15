@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+touch "/tmp/profiling-vm-active-$(id -u)"

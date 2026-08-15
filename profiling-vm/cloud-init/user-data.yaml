@@ -1,0 +1,85 @@
+#cloud-config
+hostname: __VM_NAME__
+manage_etc_hosts: true
+ssh_pwauth: false
+disable_root: true
+users:
+  - name: __VM_USER__
+    gecos: Profiling user
+    groups: [adm]
+    shell: /bin/bash
+    lock_passwd: true
+    ssh_authorized_keys:
+      - __SSH_PUBLIC_KEY__
+
+package_update: true
+package_upgrade: false
+packages:
+  - build-essential
+  - clang
+  - cmake
+  - git
+  - jq
+  - linux-perf
+  - ninja-build
+  - rsync
+  - sudo
+  - valgrind
+
+write_files:
+  - path: /etc/sysctl.d/90-perf.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      kernel.perf_event_paranoid=1
+      kernel.kptr_restrict=1
+  - path: /usr/local/bin/profile-heartbeat
+    owner: root:root
+    permissions: '0755'
+    content: |
+__HEARTBEAT_SCRIPT__
+  - path: /usr/local/sbin/profiling-vm-idle-poweroff
+    owner: root:root
+    permissions: '0755'
+    content: |
+__IDLE_SCRIPT__
+  - path: /etc/systemd/system/profiling-vm-idle-poweroff.service
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Power off an abandoned profiling VM
+
+      [Service]
+      Type=oneshot
+      Environment=IDLE_MINUTES=__IDLE_MINUTES__
+      Environment=MAX_RUNTIME_HOURS=__MAX_RUNTIME_HOURS__
+      ExecStart=/usr/local/sbin/profiling-vm-idle-poweroff
+  - path: /etc/systemd/system/profiling-vm-idle-poweroff.timer
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Check whether the profiling VM is idle
+
+      [Timer]
+      OnBootSec=10min
+      OnUnitActiveSec=5min
+      AccuracySec=30s
+
+      [Install]
+      WantedBy=timers.target
+  - path: /etc/sudoers.d/profiling-poweroff
+    owner: root:root
+    permissions: '0440'
+    content: |
+      __VM_USER__ ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff
+
+runcmd:
+  - [sysctl, --system]
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, profiling-vm-idle-poweroff.timer]
+  - [install, -d, -o, __VM_USER__, -g, __VM_USER__, -m, '0755', /home/__VM_USER__/work]
+  - [touch, /var/lib/cloud/instance/provisioning-complete]
+
+final_message: "Profiling VM provisioning complete after $UPTIME seconds"

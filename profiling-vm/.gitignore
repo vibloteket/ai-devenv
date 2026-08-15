@@ -1,0 +1,4 @@
+config.env
+*.qcow2
+*.iso
+*.img
