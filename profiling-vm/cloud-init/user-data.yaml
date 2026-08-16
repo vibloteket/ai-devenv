@@ -27,6 +27,7 @@ packages:
   - jq
   - linux-perf
   - ninja-build
+  - openssh-server
   - rsync
   - sudo
   - valgrind
@@ -82,6 +83,7 @@ __IDLE_SCRIPT__
 
 runcmd:
   - [sysctl, --system]
+  - [systemctl, enable, --now, ssh.service]
   - [systemctl, daemon-reload]
   - [systemctl, enable, --now, profiling-vm-idle-poweroff.timer]
   - [install, -d, -o, __VM_USER__, -g, __VM_USER__, -m, '0755', /home/__VM_USER__/work]
