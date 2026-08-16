@@ -143,6 +143,9 @@ dhcp_reserved=1
 virsh -c "$uri" net-update "$VM_NETWORK" add ip-dhcp-host \
   "<host mac='$VM_MAC' name='$VM_NAME' ip='$VM_IP'/>" --live --config
 
+# Generate and define the domain while it is stopped. Applying CPU affinity to
+# a running domain races its first boot and makes early-boot failures harder to
+# diagnose. Start only after all persistent configuration is in place.
 virt-install --connect "$uri" \
   --name "$VM_NAME" --memory "$VM_MEMORY_MB" --vcpus "$VM_VCPUS" \
   --cpu host-passthrough \
@@ -151,11 +154,13 @@ virt-install --connect "$uri" \
   --network "network=$VM_NETWORK,model=virtio,mac=$VM_MAC" \
   --osinfo detect=on,name=debian13 \
   --graphics none --console pty,target.type=serial \
-  --import --noautoconsole
+  --import --print-xml >"$work/domain.xml"
+virsh -c "$uri" define "$work/domain.xml" >/dev/null
 
 for index in "${!cpus[@]}"; do
-  virsh -c "$uri" vcpupin "$VM_NAME" "$index" "${cpus[$index]}" --live --config
+  virsh -c "$uri" vcpupin "$VM_NAME" "$index" "${cpus[$index]}" --config
 done
+virsh -c "$uri" start "$VM_NAME" >/dev/null
 
 echo "VM $VM_NAME started. Cloud-init can take several minutes."
 echo "SSH: ssh -i ${SSH_PUBLIC_KEY_FILE%.pub} ${VM_USER}@${VM_IP}"
