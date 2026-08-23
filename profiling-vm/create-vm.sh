@@ -10,7 +10,7 @@ CONFIG=${1:-"$SCRIPT_DIR/config.env"}
 # shellcheck disable=SC1090
 source "$CONFIG"
 
-required=(curl sha512sum ssh-keygen qemu-img cloud-localds virsh virt-install sed awk perl)
+required=(curl sha512sum ssh-keygen qemu-img cloud-localds virt-customize virsh virt-install sed awk perl)
 for command in "${required[@]}"; do command -v "$command" >/dev/null || { echo "Missing command: $command" >&2; exit 1; }; done
 [[ -r "$SSH_PUBLIC_KEY_FILE" ]] || { echo "Cannot read SSH public key: $SSH_PUBLIC_KEY_FILE" >&2; exit 1; }
 public_key=$(<"$SSH_PUBLIC_KEY_FILE")
@@ -134,6 +134,18 @@ cloud-localds "$work/seed.img" "$work/user-data" "$work/meta-data"
 # creation and also clean up a partially written image after interruption.
 images_created=1
 sudo qemu-img create -f qcow2 -F qcow2 -b "$base" "$disk" "${VM_DISK_GB}G"
+
+# This is a headless VM. Configure both GRUB and Linux for the libvirt serial
+# console before the first boot. Besides making failures observable, this avoids
+# the Debian generic image repeatedly stalling before network initialization on
+# the tested Q35/KVM host when booted with no graphical console.
+sudo virt-customize -a "$disk" \
+  --run-command 'sed -i "s/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=\"console=tty0 console=ttyS0,115200n8\"/" /etc/default/grub' \
+  --run-command 'sed -i "s/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=5/" /etc/default/grub' \
+  --run-command 'grep -q "^GRUB_TERMINAL=" /etc/default/grub && sed -i "s/^GRUB_TERMINAL=.*/GRUB_TERMINAL=\"console serial\"/" /etc/default/grub || echo "GRUB_TERMINAL=\"console serial\"" >> /etc/default/grub' \
+  --run-command 'grep -q "^GRUB_SERIAL_COMMAND=" /etc/default/grub || echo "GRUB_SERIAL_COMMAND=\"serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1\"" >> /etc/default/grub' \
+  --run-command 'update-grub'
+
 sudo install -m 0644 "$work/seed.img" "$seed"
 sudo chown libvirt-qemu:libvirt-qemu "$disk" "$seed" 2>/dev/null || sudo chown libvirt-qemu:kvm "$disk" "$seed"
 

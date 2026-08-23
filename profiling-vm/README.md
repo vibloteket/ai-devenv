@@ -26,7 +26,7 @@ Debian 13 packages:
 ```sh
 sudo apt install --no-install-recommends \
   qemu-system-x86 qemu-utils libvirt-daemon-system libvirt-clients \
-  virtinst cloud-image-utils ovmf dnsmasq-base genisoimage
+  virtinst cloud-image-utils libguestfs-tools ovmf dnsmasq-base genisoimage
 ```
 
 The calling user must belong to `libvirt` and `kvm`. The system libvirt
