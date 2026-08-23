@@ -160,7 +160,7 @@ virsh -c "$uri" net-update "$VM_NETWORK" add ip-dhcp-host \
 # diagnose. Start only after all persistent configuration is in place.
 virt-install --connect "$uri" \
   --name "$VM_NAME" --memory "$VM_MEMORY_MB" --vcpus "$VM_VCPUS" \
-  --cpu host-passthrough \
+  --cpu host-passthrough,migratable=off \
   --disk "path=$disk,format=qcow2,bus=virtio" \
   --disk "path=$seed,device=cdrom" \
   --network "network=$VM_NETWORK,model=virtio,mac=$VM_MAC" \

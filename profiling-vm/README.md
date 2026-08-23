@@ -3,7 +3,9 @@
 Creates a KVM/libvirt Debian 13 VM for repeatable native profiling without
 adding `perf` privileges to the main AI container or Docker host workloads.
 The VM uses libvirt's private NAT network, a checksum-pinned Debian cloud
-image, SSH-key-only login, host CPU passthrough, and vCPU pinning.
+image, SSH-key-only login, non-migratable host CPU passthrough, and vCPU
+pinning. Disabling CPU migration filtering is intentional: it preserves the
+host-specific PMU needed by `perf`.
 
 ## Security model
 
