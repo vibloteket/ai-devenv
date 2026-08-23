@@ -167,6 +167,14 @@ virt-install --connect "$uri" \
   --osinfo detect=on,name=debian13 \
   --graphics none --console pty,target.type=serial \
   --import --print-xml >"$work/domain.xml"
+
+# perf software events work without this, but hardware events require the KVM
+# PMU to be explicitly exposed by the domain definition.
+perl -0pi -e "s|(<features>\s*)|\$1  <pmu state='on'/>\n    |" "$work/domain.xml"
+grep -q "<pmu state='on'/>" "$work/domain.xml" || {
+  echo "Failed to enable PMU in generated domain XML" >&2
+  exit 1
+}
 virsh -c "$uri" define "$work/domain.xml" >/dev/null
 
 for index in "${!cpus[@]}"; do

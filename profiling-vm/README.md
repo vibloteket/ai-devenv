@@ -67,8 +67,9 @@ profiling-vm/verify-guest.sh
 ```
 
 The verification runs user-space hardware counters for cycles, instructions,
-branches, branch misses, and cache misses. Failure usually means the virtual
-PMU is unavailable or host policy blocks it.
+branches, branch misses, and cache misses. The generated libvirt domain
+explicitly enables its virtual PMU. Failure usually means the host KVM PMU is
+disabled or host policy blocks it.
 
 ## Keeping a long job alive
 
