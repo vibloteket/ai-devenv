@@ -12,7 +12,7 @@ image, SSH-key-only login, host CPU passthrough, and vCPU pinning.
 - The guest contains no credentials except its dedicated SSH public key.
 - `perf_event_paranoid=1` applies inside the guest only.
 - The VM has no autostart; an idle timer powers it off after 30 minutes.
-- A six-hour maximum runtime is an unconditional failsafe.
+- After provisioning, a six-hour maximum runtime is an unconditional failsafe.
 - The scripts never modify the host's physical interface or default route.
 
 The guest can still access the network through NAT. Treat it as an isolated

@@ -12,11 +12,6 @@ users:
     ssh_authorized_keys:
       - __SSH_PUBLIC_KEY__
 
-# Arm the hard shutdown before package installation. This remains effective if
-# apt, runcmd, or later provisioning hangs.
-bootcmd:
-  - [sh, -c, "systemd-run --unit=profiling-vm-hard-poweroff --on-active=__MAX_RUNTIME_HOURS__h /usr/bin/systemctl poweroff"]
-
 package_update: true
 package_upgrade: false
 packages:
