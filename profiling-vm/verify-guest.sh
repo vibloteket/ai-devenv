@@ -14,6 +14,16 @@ printf 'Host: '; hostname
 printf 'CPU: '; grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed 's/^ //'
 printf 'Tools: '; command -v cc cmake ninja perf valgrind >/dev/null && echo OK
 printf 'Perf policy: '; cat /proc/sys/kernel/perf_event_paranoid
+if ! compgen -G '/sys/bus/event_source/devices/cpu*' >/dev/null; then
+  cat >&2 <<'EOF'
+Hardware PMU unavailable in the guest. On Intel hosts exposing cpu_core and
+cpu_atom PMUs, current KVM kernels disable guest vPMU virtualization even when
+libvirt uses host-passthrough and pmu=on. Software perf events still work, but
+hardware cycles/cache/branch counters must be collected on the host or on a
+non-hybrid PMU host.
+EOF
+  exit 1
+fi
 perf_output=$(mktemp)
 trap 'rm -f "$perf_output"' EXIT
 perf stat -x, -o "$perf_output" \

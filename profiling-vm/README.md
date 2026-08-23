@@ -70,8 +70,23 @@ profiling-vm/verify-guest.sh
 
 The verification runs user-space hardware counters for cycles, instructions,
 branches, branch misses, and cache misses. The generated libvirt domain
-explicitly enables its virtual PMU. Failure usually means the host KVM PMU is
-disabled or host policy blocks it.
+explicitly enables its virtual PMU.
+
+### Intel hybrid-PMU limitation
+
+Current KVM kernels disable guest vPMU virtualization on Intel hosts that Linux
+classifies as hybrid PMU systems (`cpu_core` plus `cpu_atom` under
+`/sys/bus/event_source/devices/`). This can also affect Alder Lake SKUs with
+only P-cores, including the tested i5-12400T. In that case QEMU can correctly
+use `host-passthrough,migratable=off,pmu=on` while the guest still has no CPU
+PMU event source and hardware counters remain zero. This is a KVM safety
+restriction, not a libvirt or `perf_event_paranoid` configuration error.
+
+Software perf events, gprof, Valgrind/Callgrind, and ordinary benchmarks still
+work in the VM. Hardware cycles, cache misses, and branch misses require either
+collecting `perf` on the host around the QEMU process, a non-hybrid-PMU host, or
+a future kernel with safe hybrid vPMU support. Do not patch out KVM's safeguard
+on a general-purpose server merely to enable guest counters.
 
 ## Keeping a long job alive
 
