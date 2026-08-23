@@ -82,6 +82,20 @@ profile-heartbeat
 A typical job can update it in a background loop. The maximum six-hour runtime
 still applies and is intended to stop wedged jobs.
 
+## Recreate a failed disposable VM
+
+If provisioning fails, remove the domain, its DHCP reservation, overlay, and
+seed consistently before trying again:
+
+```sh
+profiling-vm/destroy-vm.sh
+profiling-vm/create-vm.sh
+```
+
+The destroy script asks you to type the VM name and preserves the downloaded,
+checksum-verified Debian base image. Use `--yes` only in trusted automation.
+Never remove the base image just to retry cloud-init.
+
 ## Power control
 
 The guest user can shut down only through the exact sudoers command installed
