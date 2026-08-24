@@ -35,8 +35,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     file \
     tree \
     tmux \
-    strace \
     openssh-client \
+    # debugging - benchmarks
+    linux-perf \
+    strace \
     # C
     cmake clang-format \
     # For documentation generation
@@ -268,6 +270,6 @@ RUN bun install -g github:rcarmo/piclaw
 
 EXPOSE 8161
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export PICLAW_WEB_UI_MODE=visual PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export PICLAW_WORKSPACE=\"$HOME/ai-workdir\" PICLAW_WEB_HOST=0.0.0.0 PICLAW_WEB_PORT=8161; cd \"$HOME/ai-workdir\"; piclaw --host 0.0.0.0 --port 8161"]
 
 
