@@ -266,7 +266,8 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export HAPI_LIS
 #
 FROM base AS piclaw-agent
 
-RUN bun install -g github:rcarmo/piclaw
+ARG PICLAW_VERSION=v2.15.3
+RUN bun install -g "github:rcarmo/piclaw#${PICLAW_VERSION}"
 
 EXPOSE 8161
 
