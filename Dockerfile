@@ -208,7 +208,7 @@ RUN uv tool install nanobot-ai
 EXPOSE 8136
 
 #ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "nanobot gateway"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-c", "nanobot webui"]
 
 #
 # CodeNomad & OpenCode
@@ -266,7 +266,7 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/bin/bash", "-lc", "export HAPI_LIS
 #
 FROM base AS piclaw-agent
 
-ARG PICLAW_VERSION=v3.1.2
+ARG PICLAW_VERSION=v3.3.4
 RUN bun install -g "github:rcarmo/piclaw#${PICLAW_VERSION}"
 
 EXPOSE 8161
