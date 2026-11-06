@@ -93,9 +93,9 @@ COPY --from=gitlab/glab:latest /usr/bin/glab /usr/local/bin/glab
 #     && rm forgejo-cli-x86_64-linux.tar.gz 
 
 # Install GO
-RUN curl -OL https://golang.org/dl/go1.26.0.linux-amd64.tar.gz && \
+RUN curl -OL https://golang.org/dl/go1.27.3.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.26.0.linux-amd64.tar.gz && \
-    rm go1.26.0.linux-amd64.tar.gz
+    rm go1.27.3.linux-amd64.tar.gz
 
 ENV GOPATH="/home/${USERNAME}/go"
 ENV PATH="${GOPATH}/bin:/usr/local/go/bin:${PATH}"
